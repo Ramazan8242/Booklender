@@ -25,7 +25,7 @@ public class Lesson44Server extends BasicServer {
             // путь к каталогу в котором у нас хранятся шаблоны
             // это может быть совершенно другой путь, чем тот, откуда сервер берёт файлы
             // которые отправляет пользователю
-            cfg.setDirectoryForTemplateLoading(new File("data"));
+            cfg.setDirectoryForTemplateLoading(new File("C:\\Users\\User\\Downloads\\lesson (1)\\lesson\\lesson44\\data"));
 
             // прочие стандартные настройки о них читать тут
             // https://freemarker.apache.org/docs/pgui_quickstart_createconfiguration.html
@@ -42,6 +42,14 @@ public class Lesson44Server extends BasicServer {
 
     private void freemarkerSampleHandler(HttpExchange exchange) {
         renderTemplate(exchange, "sample.html", getSampleDataModel());
+    }
+
+    private void freemarkerUser(HttpExchange httpExchange) {
+        renderTemplate(httpExchange, "user.ftl", getSampleDataModel());
+    }
+
+    private void freemarkerBooks(HttpExchange httpExchange) {
+        renderTemplate(httpExchange, "books.ftl", getBookModel());
     }
 
 protected void renderTemplate(HttpExchange exchange, String templateFile, Object dataModel) {
@@ -79,5 +87,11 @@ protected void renderTemplate(HttpExchange exchange, String templateFile, Object
         // возвращаем экземпляр тестовой модели-данных
         // которую freemarker будет использовать для наполнения шаблона
         return new SampleDataModel();
+    }
+
+    private BookModel getBookModel() {
+        // возвращаем экземпляр тестовой модели-данных
+        // которую freemarker будет использовать для наполнения шаблона
+        return new BookModel();
     }
 }
