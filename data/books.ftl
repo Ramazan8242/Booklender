@@ -10,13 +10,10 @@
 </head>
 <body>
 
-<h1>"У нас есть книги " </h1>
+<h1>"КНИГИ!"</h1>
 <ul>
     <#list books as book>
-        <li>${book.name}</li>
-        <li>${book.name}</li>
-        <li>${book.name}</li>
-        <li>${book.name}</li>
+        <li>${book.name} написанная ${book.author} статус ${book.status}</li>
     </#list>
 </ul>
 

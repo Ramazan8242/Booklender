@@ -51,8 +51,9 @@ public abstract class BasicServer {
         // самый основной обработчик, который будет определять
         // какие обработчики вызывать в дальнейшем
         server.createContext("/", this::handleIncomingServerRequests);
-//        server.createContext("/books", this::handleIncomingBookRequests);
-//        server.createContext("/books/user", this::handleIncomingBookUserRequests);
+
+
+
 
         // специфичные обработчики, которые выполняют свои действия
         // в зависимости от типа запроса
@@ -61,8 +62,9 @@ public abstract class BasicServer {
         // именно этот обработчик отвечает что отображать,
         // когда пользователь запрашивает localhost:9889
         registerGet("/", exchange -> sendFile(exchange, makeFilePath("index.html"), ContentType.TEXT_HTML));
-        registerGet("/books", exchange -> sendFile(exchange, makeFilePath("books.ftl"), ContentType.TEXT_HTML));
-        registerGet("/books/user", exchange -> sendFile(exchange, makeFilePath("user.ftl"), ContentType.TEXT_HTML));
+
+
+
 
         // эти обрабатывают запросы с указанными расширениями
         registerFileHandler(".css", ContentType.TEXT_CSS);

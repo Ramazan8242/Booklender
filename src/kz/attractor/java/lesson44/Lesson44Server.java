@@ -9,7 +9,10 @@ import kz.attractor.java.server.BasicServer;
 import kz.attractor.java.server.ContentType;
 import kz.attractor.java.server.ResponseCodes;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 public class Lesson44Server extends BasicServer {
     private final static Configuration freemarker = initFreeMarker();
@@ -17,6 +20,8 @@ public class Lesson44Server extends BasicServer {
     public Lesson44Server(String host, int port) throws IOException {
         super(host, port);
         registerGet("/sample", this::freemarkerSampleHandler);
+        registerGet("/books", this::freemarkerBookHandler);
+
     }
 
     private static Configuration initFreeMarker() {
@@ -25,7 +30,7 @@ public class Lesson44Server extends BasicServer {
             // путь к каталогу в котором у нас хранятся шаблоны
             // это может быть совершенно другой путь, чем тот, откуда сервер берёт файлы
             // которые отправляет пользователю
-            cfg.setDirectoryForTemplateLoading(new File("C:\\Users\\User\\Downloads\\lesson (1)\\lesson\\lesson44\\data"));
+            cfg.setDirectoryForTemplateLoading(new File("data"));
 
             // прочие стандартные настройки о них читать тут
             // https://freemarker.apache.org/docs/pgui_quickstart_createconfiguration.html
@@ -41,18 +46,13 @@ public class Lesson44Server extends BasicServer {
     }
 
     private void freemarkerSampleHandler(HttpExchange exchange) {
-        renderTemplate(exchange, "sample.html", getSampleDataModel());
+        renderTemplate(exchange,"sample.html", getSampleDataModel());
+    }
+    private void freemarkerBookHandler(HttpExchange exchange) {
+        renderTemplate(exchange,"books.ftl", getBookDataModel());
     }
 
-    private void freemarkerUser(HttpExchange httpExchange) {
-        renderTemplate(httpExchange, "user.ftl", getSampleDataModel());
-    }
-
-    private void freemarkerBooks(HttpExchange httpExchange) {
-        renderTemplate(httpExchange, "books.ftl", getBookModel());
-    }
-
-protected void renderTemplate(HttpExchange exchange, String templateFile, Object dataModel) {
+protected void renderTemplate(HttpExchange exchange, String templateFile,Object dataModel) {
     try {
         // загружаем шаблон из файла по имени.
         // шаблон должен находится по пути, указанном в конфигурации
@@ -88,10 +88,7 @@ protected void renderTemplate(HttpExchange exchange, String templateFile, Object
         // которую freemarker будет использовать для наполнения шаблона
         return new SampleDataModel();
     }
-
-    private BookModel getBookModel() {
-        // возвращаем экземпляр тестовой модели-данных
-        // которую freemarker будет использовать для наполнения шаблона
-        return new BookModel();
+    private BookDataModel getBookDataModel(){
+        return new BookDataModel();
     }
 }

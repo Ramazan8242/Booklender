@@ -9,11 +9,12 @@ public class SampleDataModel {
     private LocalDateTime currentDateTime = LocalDateTime.now();
     private List<User> customers = new ArrayList<>();
 
+
     public SampleDataModel() {
-        customers.add(new User("Толстой"));
-        customers.add(new User("Джордж ", "Оруэлл"));
-        customers.add(new User("Джордж ", "Оруэлл"));
-        customers.add(new User("Джеймс ", "Джойс", "'Владимир '"));
+        customers.add(new User("Marco"));
+        customers.add(new User("Winston", "Duarte"));
+        customers.add(new User("Amos", "Burton", "'Timmy'"));
+        customers.get(1).setEmailConfirmed(true);
     }
 
     public User getUser() {
@@ -40,12 +41,41 @@ public class SampleDataModel {
         this.customers = customers;
     }
 
+    public static class book{
+        private String name;
+        private String author;
+
+        public book(String name, String author) {
+            this.name = name;
+            this.author = author;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getAuthor() {
+            return author;
+        }
+
+        public void setAuthor(String author) {
+            this.author = author;
+        }
+    }
+
     public static class User {
         private String firstName;
         private String lastName;
         private String middleName = null;
+        private boolean emailConfirmed = false;
+        private String email;
 
         public User(String firstName) {
+
             this(firstName, null, null);
         }
 
@@ -57,6 +87,7 @@ public class SampleDataModel {
             this.firstName = firstName;
             this.lastName = lastName;
             this.middleName = middleName;
+            this.email = firstName+"@test.mail";
         }
 
         public String getFirstName() {
@@ -81,6 +112,22 @@ public class SampleDataModel {
 
         public void setMiddleName(String middleName) {
             this.middleName = middleName;
+        }
+
+        public boolean isEmailConfirmed() {
+            return emailConfirmed;
+        }
+
+        public void setEmailConfirmed(boolean emailConfirmed) {
+            this.emailConfirmed = emailConfirmed;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
         }
     }
 }
