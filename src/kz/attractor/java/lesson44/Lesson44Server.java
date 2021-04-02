@@ -21,7 +21,8 @@ public class Lesson44Server extends BasicServer {
         super(host, port);
         registerGet("/sample", this::freemarkerSampleHandler);
         registerGet("/books", this::freemarkerBookHandler);
-
+        registerGet("/user", this::freemarkerUserHandler);
+        registerGet("/home", this::freemarkerHomePageHandler);
     }
 
     private static Configuration initFreeMarker() {
@@ -51,37 +52,43 @@ public class Lesson44Server extends BasicServer {
     private void freemarkerBookHandler(HttpExchange exchange) {
         renderTemplate(exchange,"books.ftl", getBookDataModel());
     }
-
-protected void renderTemplate(HttpExchange exchange, String templateFile,Object dataModel) {
-    try {
-        // загружаем шаблон из файла по имени.
-        // шаблон должен находится по пути, указанном в конфигурации
-        Template temp = freemarker.getTemplate(templateFile);
-
-        // freemarker записывает преобразованный шаблон в объект класса writer
-        // а наш сервер отправляет клиенту массивы байт
-        // по этому нам надо сделать "мост" между этими двумя системами
-
-        // создаём поток который сохраняет всё, что в него будет записано в байтовый массив
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        // создаём объект, который умеет писать в поток и который подходит для freemarker
-        try (OutputStreamWriter writer = new OutputStreamWriter(stream)) {
-
-            // обрабатываем шаблон заполняя его данными из модели
-            // и записываем результат в объект "записи"
-            temp.process(dataModel, writer);
-            writer.flush();
-
-            // получаем байтовый поток
-            var data = stream.toByteArray();
-
-            // отправляем результат клиенту
-            sendByteData(exchange, ResponseCodes.OK, ContentType.TEXT_HTML, data);
-        }
-    } catch (IOException | TemplateException e) {
-        e.printStackTrace();
+    private void freemarkerUserHandler(HttpExchange httpExchange) {
+        renderTemplate(httpExchange,"user.ftl", getUserDataModel());
     }
-}
+    private void freemarkerHomePageHandler(HttpExchange httpExchange) {
+        renderTemplate(httpExchange,"home.ftl", getHomePageDataModel());
+    }
+
+    protected void renderTemplate(HttpExchange exchange, String templateFile,Object dataModel) {
+        try {
+            // загружаем шаблон из файла по имени.
+            // шаблон должен находится по пути, указанном в конфигурации
+            Template temp = freemarker.getTemplate(templateFile);
+
+            // freemarker записывает преобразованный шаблон в объект класса writer
+            // а наш сервер отправляет клиенту массивы байт
+            // по этому нам надо сделать "мост" между этими двумя системами
+
+            // создаём поток который сохраняет всё, что в него будет записано в байтовый массив
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            // создаём объект, который умеет писать в поток и который подходит для freemarker
+            try (OutputStreamWriter writer = new OutputStreamWriter(stream)) {
+
+                // обрабатываем шаблон заполняя его данными из модели
+                // и записываем результат в объект "записи"
+                temp.process(dataModel, writer);
+                writer.flush();
+
+                // получаем байтовый поток
+                var data = stream.toByteArray();
+
+                // отправляем результат клиенту
+                sendByteData(exchange, ResponseCodes.OK, ContentType.TEXT_HTML, data);
+            }
+        } catch (IOException | TemplateException e) {
+            e.printStackTrace();
+        }
+    }
 
     private SampleDataModel getSampleDataModel() {
         // возвращаем экземпляр тестовой модели-данных
@@ -90,5 +97,11 @@ protected void renderTemplate(HttpExchange exchange, String templateFile,Object 
     }
     private BookDataModel getBookDataModel(){
         return new BookDataModel();
+    }
+    private UserDataModel getUserDataModel() {
+        return new UserDataModel();
+    }
+    private HomePage getHomePageDataModel() {
+        return new HomePage();
     }
 }

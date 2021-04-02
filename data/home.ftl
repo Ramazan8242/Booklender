@@ -8,11 +8,10 @@
     <link href="css/freemarker.css" rel="stylesheet">
 </head>
 <body>
-<h1>Сотрудник!</h1>
+<h1>ГЛАВНАЯ СТРАНИЦА</h1>
 <ul>
-    <#list customers as customer>
-        <li>${customer.name} взял почитать ${customer.tookRead} прочитал ${customer.alreadyTook}</li>
-    </#list>
+    <li> <a href="http://localhost:9877/books">ИНФОРМАЦИЯ О КНИГ</a> </li>
+    <li> <a href="http://localhost:9877/user">ИНФОРМАЦИЯ О СОТРУДНИКЕ</a> </li>
 </ul>
 </body>
 </html>

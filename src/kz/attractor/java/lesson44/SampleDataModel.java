@@ -9,7 +9,6 @@ public class SampleDataModel {
     private LocalDateTime currentDateTime = LocalDateTime.now();
     private List<User> customers = new ArrayList<>();
 
-
     public SampleDataModel() {
         customers.add(new User("Marco"));
         customers.add(new User("Winston", "Duarte"));
@@ -41,32 +40,6 @@ public class SampleDataModel {
         this.customers = customers;
     }
 
-    public static class book{
-        private String name;
-        private String author;
-
-        public book(String name, String author) {
-            this.name = name;
-            this.author = author;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getAuthor() {
-            return author;
-        }
-
-        public void setAuthor(String author) {
-            this.author = author;
-        }
-    }
-
     public static class User {
         private String firstName;
         private String lastName;
@@ -75,7 +48,6 @@ public class SampleDataModel {
         private String email;
 
         public User(String firstName) {
-
             this(firstName, null, null);
         }
 

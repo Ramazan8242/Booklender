@@ -1,10 +1,11 @@
 package kz.attractor.java.lesson44;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookDataModel {
-    private List<Book> books= new ArrayList<>();
+    private List<Book> books = new ArrayList<>();
 
     public List<Book> getBooks() {
         return books;
@@ -15,11 +16,11 @@ public class BookDataModel {
     }
 
     public BookDataModel() {
-            books.add(new Book("«Война и мир»","Лев Толстой","Роман","User"));
-            books.add(new Book("«Улисс»","Джеймс Джойс","Модернизм","on"));
-            books.add(new Book("«Лолита»","Владимир Набоков","Роман","User"));
-            books.add(new Book("«Звук и ярость»","Уильям Фолкнер","Южная готика","User"));
-        }
+        books.add(new Book("«Война и мир»","Лев Толстой","Роман","Good"));
+        books.add(new Book("«Улисс»","Джеймс Джойс","Модернизм","Good"));
+        books.add(new Book("«Лолита»","Владимир Набоков","Роман","Bad"));
+        books.add(new Book("«Звук и ярость»","Уильям Фолкнер","Южная готика","Normal"));
+    }
     public class Book{
         private String name;
         private String author;

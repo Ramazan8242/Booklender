@@ -52,9 +52,6 @@ public abstract class BasicServer {
         // какие обработчики вызывать в дальнейшем
         server.createContext("/", this::handleIncomingServerRequests);
 
-
-
-
         // специфичные обработчики, которые выполняют свои действия
         // в зависимости от типа запроса
 
@@ -63,12 +60,10 @@ public abstract class BasicServer {
         // когда пользователь запрашивает localhost:9889
         registerGet("/", exchange -> sendFile(exchange, makeFilePath("index.html"), ContentType.TEXT_HTML));
 
-
-
-
         // эти обрабатывают запросы с указанными расширениями
         registerFileHandler(".css", ContentType.TEXT_CSS);
         registerFileHandler(".html", ContentType.TEXT_HTML);
+        registerFileHandler(".ftl", ContentType.TEXT_HTML);
         registerFileHandler(".jpg", ContentType.IMAGE_JPEG);
         registerFileHandler(".png", ContentType.IMAGE_PNG);
 
@@ -76,6 +71,9 @@ public abstract class BasicServer {
 
     protected final void registerGet(String route, RouteHandler handler) {
         getRoutes().put("GET " + route, handler);
+    }
+    protected void registerPost(String route,RouteHandler handler){
+        getRoutes().put("POST " + route,handler);
     }
 
     protected final void registerFileHandler(String fileExt, ContentType type) {
