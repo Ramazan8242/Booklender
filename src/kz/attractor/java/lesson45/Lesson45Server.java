@@ -1,4 +1,4 @@
-package kz.attractor.java.lesson44;
+package kz.attractor.java.lesson45;
 
 import com.sun.net.httpserver.HttpExchange;
 import freemarker.template.Configuration;
@@ -8,21 +8,28 @@ import freemarker.template.TemplateExceptionHandler;
 import kz.attractor.java.server.BasicServer;
 import kz.attractor.java.server.ContentType;
 import kz.attractor.java.server.ResponseCodes;
+import kz.attractor.java.server.Utils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import static java.util.stream.Collectors.joining;
 
-public class Lesson44Server extends BasicServer {
+public class Lesson45Server extends BasicServer {
     private final static Configuration freemarker = initFreeMarker();
 
-    public Lesson44Server(String host, int port) throws IOException {
+    public Lesson45Server(String host, int port) throws IOException {
         super(host, port);
         registerGet("/sample", this::freemarkerSampleHandler);
         registerGet("/books", this::freemarkerBookHandler);
         registerGet("/user", this::freemarkerUserHandler);
         registerGet("/home", this::freemarkerHomePageHandler);
+        registerGet("/login", this::loginGet);
+        registerPost("/login", this::loginPost);
+        registerGet("/register", this::registerGetRequest);
     }
 
     private static Configuration initFreeMarker() {
@@ -57,6 +64,61 @@ public class Lesson44Server extends BasicServer {
     }
     private void freemarkerHomePageHandler(HttpExchange httpExchange) {
         renderTemplate(httpExchange,"home.ftl", getHomePageDataModel());
+    }
+    private void registerGetRequest(HttpExchange httpExchange) {
+        renderTemplate(httpExchange,"register.ftl", getRegisterGetRequest());
+    }
+
+    private void loginGet(HttpExchange exchange) {
+        Path path = makeFilePath("login.html");
+        sendFile(exchange,path,ContentType.TEXT_HTML);
+    }
+    private void loginPost(HttpExchange httpExchange) {
+        redirect303(httpExchange, "/");
+        String cType = getContentType(httpExchange);
+        String raw = getBody(httpExchange);
+        // преобразуем данные в формате form-urlencoded,
+        // обратно в читаемый вид.
+        Map<String, String> parsed = Utils.parseUrlEncoded(raw, "&");
+        // отправим данные обратно пользователю,
+        // что бы показать, что мы обработали запрос
+        String fmt = "<p>Необработанные данные: <b>%s</b></p>" + "<p>Content-type: <b>%s</b></p>" + "<p>После обработки: <b>%s</b></p>";
+        String data = String.format(fmt, raw, cType, parsed);
+        try { sendByteData(httpExchange, ResponseCodes.OK,
+                    ContentType.TEXT_PLAIN, data.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected String getBody(HttpExchange httpExchange) {
+        InputStream input = httpExchange.getRequestBody();
+        Charset utf8 = StandardCharsets.UTF_8;
+        InputStreamReader isr = new InputStreamReader(input, utf8);
+        // сейчас мы предполагаем, что клиент
+        // отправляет текстовые данные
+        try (BufferedReader reader = new BufferedReader(isr)) {
+            return reader.lines().collect(joining(""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    protected void redirect303(HttpExchange exchange, String path) {
+        try {
+            exchange.getResponseHeaders().add("Location", path);
+            exchange.sendResponseHeaders(303, 0);
+            exchange.getResponseBody().close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getContentType(HttpExchange httpExchange) {
+        return httpExchange.getRequestHeaders()
+                .getOrDefault("Content-Type", List.of(""))
+                .get(0);
     }
 
     protected void renderTemplate(HttpExchange exchange, String templateFile,Object dataModel) {
@@ -103,5 +165,8 @@ public class Lesson44Server extends BasicServer {
     }
     private HomePage getHomePageDataModel() {
         return new HomePage();
+    }
+    private Register getRegisterGetRequest() {
+        return new Register();
     }
 }

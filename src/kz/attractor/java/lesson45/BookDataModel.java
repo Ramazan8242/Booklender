@@ -1,4 +1,4 @@
-package kz.attractor.java.lesson44;
+package kz.attractor.java.lesson45;
 
 
 import java.util.ArrayList;
