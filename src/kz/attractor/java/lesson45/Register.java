@@ -23,19 +23,19 @@ public class Register {
     }
 
     public class Registers{
-        private String email;
         private String username;
+        private String email;
         private int password;
         private boolean emailConfirmed = false;
 
-        public Registers(String email, String username) {
-            this.email = email;
+        public Registers(String username,String email) {
             this.username = username;
+            this.email = email;
         }
 
         public Registers( String username, int password, boolean emailConfirmed) {
-            this.email = username + "@test.mail";
             this.username = username;
+            this.email = username + "@test.mail";
             this.password = password;
             this.emailConfirmed = emailConfirmed;
         }

@@ -30,6 +30,12 @@ public class Lesson45Server extends BasicServer {
         registerGet("/login", this::loginGet);
         registerPost("/login", this::loginPost);
         registerGet("/register", this::registerGetRequest);
+        registerGet("/registerPost", this::successfulRegistration);
+        registerGet("/session", this::registerGetRequest);
+    }
+
+    private void successfulRegistration(HttpExchange httpExchange) {
+        this.sendFile(httpExchange,makeFilePath("successfulRegistration.html"),ContentType.TEXT_HTML);
     }
 
     private static Configuration initFreeMarker() {
@@ -73,19 +79,26 @@ public class Lesson45Server extends BasicServer {
         Path path = makeFilePath("login.html");
         sendFile(exchange,path,ContentType.TEXT_HTML);
     }
-    private void loginPost(HttpExchange httpExchange) {
-        redirect303(httpExchange, "/");
+    private void  loginPost(HttpExchange httpExchange) {
         String cType = getContentType(httpExchange);
         String raw = getBody(httpExchange);
         // преобразуем данные в формате form-urlencoded,
         // обратно в читаемый вид.
         Map<String, String> parsed = Utils.parseUrlEncoded(raw, "&");
+//        if (parsed.containsKey("email") && parsed.get("email").equals("ttt@ttt.ttt")){
+//            redirect303(httpExchange,"/");
+//            return;
+//        }
+        if (parsed.containsKey("marker")){
+            redirect303(httpExchange,"/" + parsed.get("marker"));
+            return;
+        }
         // отправим данные обратно пользователю,
         // что бы показать, что мы обработали запрос
         String fmt = "<p>Необработанные данные: <b>%s</b></p>" + "<p>Content-type: <b>%s</b></p>" + "<p>После обработки: <b>%s</b></p>";
         String data = String.format(fmt, raw, cType, parsed);
         try { sendByteData(httpExchange, ResponseCodes.OK,
-                    ContentType.TEXT_PLAIN, data.getBytes());
+                    ContentType.TEXT_HTML, data.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
