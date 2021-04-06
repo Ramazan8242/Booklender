@@ -34,10 +34,6 @@ public class Lesson45Server extends BasicServer {
         registerGet("/session", this::registerGetRequest);
     }
 
-    private void successfulRegistration(HttpExchange httpExchange) {
-        this.sendFile(httpExchange,makeFilePath("successfulRegistration.html"),ContentType.TEXT_HTML);
-    }
-
     private static Configuration initFreeMarker() {
         try {
             Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
@@ -74,12 +70,16 @@ public class Lesson45Server extends BasicServer {
     private void registerGetRequest(HttpExchange httpExchange) {
         renderTemplate(httpExchange,"register.ftl", getRegisterGetRequest());
     }
+    private void successfulRegistration(HttpExchange httpExchange) {
+        this.sendFile(httpExchange, makeFilePath("successfulRegistration.html"), ContentType.TEXT_HTML);
+    }
 
     private void loginGet(HttpExchange exchange) {
-        Path path = makeFilePath("login.html");
+        Path path = makeFilePath("login.ftl");
         sendFile(exchange,path,ContentType.TEXT_HTML);
     }
     private void  loginPost(HttpExchange httpExchange) {
+        redirect303(httpExchange,"/home");
         String cType = getContentType(httpExchange);
         String raw = getBody(httpExchange);
         // преобразуем данные в формате form-urlencoded,
@@ -89,10 +89,10 @@ public class Lesson45Server extends BasicServer {
 //            redirect303(httpExchange,"/");
 //            return;
 //        }
-        if (parsed.containsKey("marker")){
-            redirect303(httpExchange,"/" + parsed.get("marker"));
-            return;
-        }
+//        if (parsed.containsKey("marker")){
+//            redirect303(httpExchange,"/" + parsed.get("marker"));
+//            return;
+//        }
         // отправим данные обратно пользователю,
         // что бы показать, что мы обработали запрос
         String fmt = "<p>Необработанные данные: <b>%s</b></p>" + "<p>Content-type: <b>%s</b></p>" + "<p>После обработки: <b>%s</b></p>";

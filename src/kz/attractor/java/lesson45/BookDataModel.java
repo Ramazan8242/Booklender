@@ -16,21 +16,19 @@ public class BookDataModel {
     }
 
     public BookDataModel() {
-        books.add(new Book("«Война и мир»","Лев Толстой","Роман","Good"));
-        books.add(new Book("«Улисс»","Джеймс Джойс","Модернизм","Good"));
-        books.add(new Book("«Лолита»","Владимир Набоков","Роман","Bad"));
-        books.add(new Book("«Звук и ярость»","Уильям Фолкнер","Южная готика","Normal"));
+        books.add(new Book("«Война и мир»","Лев Толстой","Good"));
+        books.add(new Book("«Улисс»","Джеймс Джойс","Good"));
+        books.add(new Book("«Лолита»","Владимир Набоков","Bad"));
+        books.add(new Book("«Звук и ярость»","Уильям Фолкнер","Normal"));
     }
     public class Book{
         private String name;
         private String author;
-        private String genre;
         private String status;
 
-        public Book(String name, String author, String genre, String status) {
+        public Book(String name, String author, String status) {
             this.name = name;
             this.author = author;
-            this.genre = genre;
             this.status = status;
         }
 
@@ -48,14 +46,6 @@ public class BookDataModel {
 
         public void setAuthor(String author) {
             this.author = author;
-        }
-
-        public String getGenre() {
-            return genre;
-        }
-
-        public void setGenre(String genre) {
-            this.genre = genre;
         }
 
         public String getStatus() {

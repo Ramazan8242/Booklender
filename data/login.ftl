@@ -34,11 +34,10 @@
     </form>
     <form action="/login" method="post">
         <fieldset>
-            <INPUT TYPE="hidden" VALUE="registerPost" name="marker"/>
+            <INPUT TYPE="hidden" VALUE="login" name="marker"/>
             <div class="form-element">
                 <button class="register-button" type="submit">Register</button>
             </div>
-            <p style="color: #ff0000; margin-left: 50px">Это имя пользователя уже занято. Попробуйте другое.</p>
         </fieldset>
     </form>
 </main>

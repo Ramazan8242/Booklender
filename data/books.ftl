@@ -11,7 +11,7 @@
 <h1>КНИГИ!</h1>
 <ul>
     <#list books as book>
-        <li>${book.name} написанная ${book.author} жанр ${book.genre} статус ${book.status}</li>
+        <li>${book.name} написанная ${book.author} статус ${book.status}</li>
     </#list>
 </ul>
 </body>
