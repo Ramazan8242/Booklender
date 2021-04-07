@@ -11,7 +11,10 @@
 <h1>Сотрудник!</h1>
 <ul>
     <#list customers as customer>
-        <li>${customer.name} взял почитать ${customer.tookRead} прочитал ${customer.alreadyTook}</li>
+        <li> Name: ${customer.name}</li>
+        <li> Email: ${customer.email}</li>
+        <li> Login: ${customer.login}</li>
+        <li> Password: ${customer.password}</li>
     </#list>
 </ul>
 </body>

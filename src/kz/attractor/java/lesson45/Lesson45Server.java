@@ -14,24 +14,40 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import static java.util.stream.Collectors.joining;
 
 public class Lesson45Server extends BasicServer {
+    public static final String  EMAIL = "email";
     private final static Configuration freemarker = initFreeMarker();
+    public static final String LOGIN = "login";
+    public static final String PASSWORD = "password";
+    private List<User> users = new ArrayList<>();
 
     public Lesson45Server(String host, int port) throws IOException {
         super(host, port);
         registerGet("/sample", this::freemarkerSampleHandler);
+
         registerGet("/books", this::freemarkerBookHandler);
         registerGet("/user", this::freemarkerUserHandler);
         registerGet("/home", this::freemarkerHomePageHandler);
+
         registerGet("/login", this::loginGet);
         registerPost("/login", this::loginPost);
+
         registerGet("/register", this::registerGetRequest);
-        registerGet("/registerPost", this::successfulRegistration);
-        registerGet("/session", this::registerGetRequest);
+        registerPost("/register", this::registerPostRequest);
+
+        registerGet("/profile", this::profileGet);
+    }
+
+    private void profileGet(HttpExchange httpExchange) {
+        Path path = makeFilePath("profile.html");
+        sendFile(httpExchange,path,ContentType.TEXT_HTML);
     }
 
     private static Configuration initFreeMarker() {
@@ -62,46 +78,84 @@ public class Lesson45Server extends BasicServer {
         renderTemplate(exchange,"books.ftl", getBookDataModel());
     }
     private void freemarkerUserHandler(HttpExchange httpExchange) {
-        renderTemplate(httpExchange,"user.ftl", getUserDataModel());
+        renderTemplate(httpExchange,"user.html", getUserDataModel());
     }
     private void freemarkerHomePageHandler(HttpExchange httpExchange) {
         renderTemplate(httpExchange,"home.ftl", getHomePageDataModel());
     }
     private void registerGetRequest(HttpExchange httpExchange) {
-        renderTemplate(httpExchange,"register.ftl", getRegisterGetRequest());
+        Path path = makeFilePath("register.html");
+        sendFile(httpExchange,path,ContentType.TEXT_HTML);
     }
-    private void successfulRegistration(HttpExchange httpExchange) {
-        this.sendFile(httpExchange, makeFilePath("successfulRegistration.html"), ContentType.TEXT_HTML);
+    private void registerPostRequest(HttpExchange exchange) {
+//        String cType = getContentType(exchange);
+        String raw = getBody(exchange);
+        Map<String, String> parsed =
+                Utils.parseUrlEncoded(raw, "&");
+//        if (isExistUser(parsed.get(EMAIL))){
+//            renderTemplate(exchange,"error.html",parsed);
+//            return;
+//        }
+//        User user = registrationUser(parsed);
+//        renderTemplate(exchange,"profile.html",user);
+
+        if (isValidUser(parsed)) {
+            redirect303(exchange,"/profile");
+            return;
+        }
+        redirect303(exchange,"/login");
+    }
+
+    private User registrationUser(Map<String, String> parsed) {
+        User newUser  = new User();
+        newUser.setEmail(parsed.get(EMAIL));
+        newUser.setLogin(parsed.get(LOGIN));
+        newUser.setPassword(parsed.get(PASSWORD));
+        users.add(newUser);
+        return newUser;
+    }
+
+    private boolean isExistUser(String email) {
+        return users.stream().anyMatch(user -> user.getEmail().equals(email));
     }
 
     private void loginGet(HttpExchange exchange) {
-        Path path = makeFilePath("login.ftl");
+        Path path = makeFilePath("login.html");
         sendFile(exchange,path,ContentType.TEXT_HTML);
     }
     private void  loginPost(HttpExchange httpExchange) {
-        redirect303(httpExchange,"/home");
         String cType = getContentType(httpExchange);
         String raw = getBody(httpExchange);
-        // преобразуем данные в формате form-urlencoded,
-        // обратно в читаемый вид.
         Map<String, String> parsed = Utils.parseUrlEncoded(raw, "&");
-//        if (parsed.containsKey("email") && parsed.get("email").equals("ttt@ttt.ttt")){
-//            redirect303(httpExchange,"/");
-//            return;
-//        }
-//        if (parsed.containsKey("marker")){
-//            redirect303(httpExchange,"/" + parsed.get("marker"));
-//            return;
-//        }
-        // отправим данные обратно пользователю,
-        // что бы показать, что мы обработали запрос
-        String fmt = "<p>Необработанные данные: <b>%s</b></p>" + "<p>Content-type: <b>%s</b></p>" + "<p>После обработки: <b>%s</b></p>";
-        String data = String.format(fmt, raw, cType, parsed);
-        try { sendByteData(httpExchange, ResponseCodes.OK,
-                    ContentType.TEXT_HTML, data.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (isExistUser(parsed.get(EMAIL))){
+            renderTemplate(httpExchange,"error.html",parsed);
+            return;
         }
+        User user = registrationUser(parsed);
+        renderTemplate(httpExchange,"profile.html",user);
+    }
+
+    private boolean isValidUser(Map<String, String> parsed) {
+        Optional<User> user = getUserByLogin(parsed.get(LOGIN));
+        if (!user.isPresent()) {
+            return false;
+        }
+
+        if (!user.get().getPassword().equals(parsed.get(PASSWORD))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private Optional<User> getUserByLogin(String login) {
+        for(User user: users) {
+            if(user.getLogin().equals(login)) {
+                return Optional.of(user);
+            }
+        }
+
+        return Optional.empty();
     }
 
     protected String getBody(HttpExchange httpExchange) {
@@ -173,8 +227,8 @@ public class Lesson45Server extends BasicServer {
     private BookDataModel getBookDataModel(){
         return new BookDataModel();
     }
-    private UserDataModel getUserDataModel() {
-        return new UserDataModel();
+    private User getUserDataModel() {
+        return new User();
     }
     private HomePage getHomePageDataModel() {
         return new HomePage();
