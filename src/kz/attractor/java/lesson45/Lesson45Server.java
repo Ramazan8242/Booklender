@@ -34,7 +34,7 @@ public class Lesson45Server extends BasicServer {
 
         registerGet("/books", this::freemarkerBookHandler);
         registerGet("/user", this::freemarkerUserHandler);
-        registerGet("/home", this::freemarkerHomePageHandler);
+        registerGet("/success", this::freemarkerHomePageHandler);
 
         registerGet("/login", this::loginGet);
         registerPost("/login", this::loginPost);
@@ -81,7 +81,7 @@ public class Lesson45Server extends BasicServer {
         renderTemplate(httpExchange,"user.ftl", getUserDataModel());
     }
     private void freemarkerHomePageHandler(HttpExchange httpExchange) {
-        renderTemplate(httpExchange,"home.ftl", getHomePageDataModel());
+        renderTemplate(httpExchange,"success.html", getHomePageDataModel());
     }
     private void registerGetRequest(HttpExchange httpExchange) {
         Path path = makeFilePath("register.html");
@@ -90,22 +90,18 @@ public class Lesson45Server extends BasicServer {
     private void registerPostRequest(HttpExchange exchange) {
         String cType = getContentType(exchange);
         String raw = getBody(exchange);
+
         Map<String, String> parsed =
                 Utils.parseUrlEncoded(raw, "&");
-        if (isValidUser(parsed)) {
-            redirect303(exchange,"/profile");
+        if(isExistUser(parsed.get(EMAIL))){
+            renderTemplate(exchange, "error.html", parsed);
             return;
         }
-        redirect303(exchange,"/login");
+        User user = registrationUser(parsed);
+        renderTemplate(exchange, "success.html", user);
     }
 
     private User registrationUser(Map<String, String> parsed) {
-//        User newUser = new User();
-//        newUser.setEmail(parsed.get(EMAIL));
-//        newUser.setLogin(parsed.get(LOGIN));
-//        newUser.setPassword(parsed.get(PASSWORD));
-//        users.add(newUser);
-//        return newUser;
             User newUser = User.makeUser(parsed.get(EMAIL), parsed.get(LOGIN), parsed.get(PASSWORD));
             users.add(newUser);
         return newUser;
@@ -122,15 +118,13 @@ public class Lesson45Server extends BasicServer {
     private void  loginPost(HttpExchange exchange) {
         String cType = getContentType(exchange);
         String raw = getBody(exchange);
-
         Map<String, String> parsed =
                 Utils.parseUrlEncoded(raw, "&");
-        if(isExistUser(parsed.get(EMAIL))){
-            renderTemplate(exchange, "error.html", parsed);
+        if (isValidUser(parsed)) {
+            renderTemplate(exchange,"profile.html",parsed);
             return;
         }
-        User user = registrationUser(parsed);
-        renderTemplate(exchange, "profile.html", user);
+        redirect303(exchange,"/login");
     }
 
     private boolean isValidUser(Map<String, String> parsed) {
