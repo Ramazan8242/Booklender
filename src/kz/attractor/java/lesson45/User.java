@@ -8,8 +8,9 @@ package kz.attractor.java.lesson45;
 
         public User() { }
 
-        public static User makeUser(String email, String login, String password){
+        public static User makeUser(String name,String email, String login, String password){
             User u = new User();
+            u.name = name;
             u.email = email;
             u.login = login;
             u.password = password;

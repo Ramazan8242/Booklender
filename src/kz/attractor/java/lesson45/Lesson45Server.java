@@ -14,14 +14,12 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.stream.Collectors.joining;
 
 public class Lesson45Server extends BasicServer {
+    public static final String  NAME = "name";
     public static final String  EMAIL = "email";
     private final static Configuration freemarker = initFreeMarker();
     public static final String LOGIN = "login";
@@ -43,11 +41,32 @@ public class Lesson45Server extends BasicServer {
         registerPost("/register", this::registerPostRequest);
 
         registerGet("/profile", this::profileGet);
+
+        registerGet("/session", this::sessionHandler);
+
+        registerGet("/query", this::handleQueryRequest);
     }
 
-    private void profileGet(HttpExchange httpExchange) {
-        Path path = makeFilePath("profile.html");
-        sendFile(httpExchange,path,ContentType.TEXT_HTML);
+    private void sessionHandler(HttpExchange exchange) {
+        Map<String, Object> data = new HashMap<>();
+        String name = "times";
+
+// получим cookie от клиента
+        String cookieStr = getCookies(exchange);
+        Map<String, String> cookies = Cookie.parse(cookieStr);
+// если есть значение, то преобразуем в число
+// если нет значения, то установим его в "0"
+        String cookieValue = cookies.getOrDefault(name, "0");
+        int times = Integer.parseInt(cookieValue) + 1;
+// создадим cookie с новым значением
+        Cookie response = Cookie.of(name, times);
+// обязательно его отправим обратно на клиент
+        setCookie(exchange, response);
+// отрендерим страницу
+        data.put(name, times);
+        data.put("cookies", cookies);
+
+        renderTemplate(exchange, "cookies.html", data);
     }
 
     private static Configuration initFreeMarker() {
@@ -78,7 +97,7 @@ public class Lesson45Server extends BasicServer {
         renderTemplate(exchange,"books.html", getBookDataModel());
     }
     private void freemarkerUserHandler(HttpExchange httpExchange) {
-        renderTemplate(httpExchange,"user.ftl", getUserDataModel());
+        renderTemplate(httpExchange,"user.html", getUserDataModel());
     }
     private void freemarkerHomePageHandler(HttpExchange httpExchange) {
         renderTemplate(httpExchange,"success.html", getHomePageDataModel());
@@ -101,8 +120,13 @@ public class Lesson45Server extends BasicServer {
         renderTemplate(exchange, "success.html", user);
     }
 
+    private void profileGet(HttpExchange httpExchange) {
+        Path path = makeFilePath("profile.html");
+        sendFile(httpExchange,path,ContentType.TEXT_HTML);
+    }
+
     private User registrationUser(Map<String, String> parsed) {
-            User newUser = User.makeUser(parsed.get(EMAIL), parsed.get(LOGIN), parsed.get(PASSWORD));
+            User newUser = User.makeUser(parsed.get(NAME),parsed.get(EMAIL), parsed.get(LOGIN), parsed.get(PASSWORD));
             users.add(newUser);
         return newUser;
     }
@@ -227,5 +251,33 @@ public class Lesson45Server extends BasicServer {
     }
     private Register getRegisterGetRequest() {
         return new Register();
+    }
+
+    private void setCookie(HttpExchange exchange, Cookie response) {
+        exchange.getResponseHeaders()
+                .add("Set-Cookie", response.toString());
+    }
+
+    private String getCookies(HttpExchange exchange) {
+        return exchange.getRequestHeaders().getOrDefault("Cookie", List.of("")).get(0);
+    }
+    protected String getQueryParams(HttpExchange exchange) {
+// нам "повезло", что HttpExchange умеет вытаскивать
+// параметры запроса из строки запроса.
+        String query = exchange.getRequestURI().getQuery();
+        return Objects.nonNull(query) ? query : "";
+
+    }
+    private void handleQueryRequest(HttpExchange exchange) {
+        // вытаскиваем параметры из запроса
+        String queryParams = getQueryParams(exchange);
+// преобразуем в пары ключ-значение
+        Map<String, String> params = Utils.parseUrlEncoded(queryParams, "&");
+// мы можем теперь пользоваться этими данными как
+// нам нравится, но мы просто
+// отображаем их в шаблоне
+        Map<String, Object> data = new HashMap<>();
+        data.put("params", params);
+        renderTemplate(exchange, "query.ftl", data);
     }
 }

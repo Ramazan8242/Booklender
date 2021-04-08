@@ -23,16 +23,30 @@ public abstract class BasicServer {
     }
 
     private static String makeKey(String method, String route) {
+        route = ensureStartsWithSlash(route);
         return String.format("%s %s", method.toUpperCase(), route);
     }
 
+    private static String ensureStartsWithSlash(String route){
+        if (route.startsWith("."))
+            return route;
+        return route.startsWith("/") ? route : "/" + route;
+    }
+    protected final void registerGenericHandler(String method, String route, RouteHandler handler) {
+        getRoutes().put(makeKey(method, route), handler);
+    }
+
     private static String makeKey(HttpExchange exchange) {
-        var method = exchange.getRequestMethod();
-        var path = exchange.getRequestURI().getPath();
-
-        var index = path.lastIndexOf(".");
-        var extOrPath = index != -1 ? path.substring(index).toLowerCase() : path;
-
+        String method = exchange.getRequestMethod();
+        String path = exchange.getRequestURI().getPath();
+// уберём конечную косую черту если она есть
+        if (path.endsWith("/") && path.length() > 1) {
+            path = path.substring(0, path.length() - 1);
+        }
+        int index = path.lastIndexOf(".");
+        String extOrPath = index != -1
+                ? path.substring(index).toLowerCase()
+                : path;
         return makeKey(method, extOrPath);
     }
 
@@ -69,11 +83,13 @@ public abstract class BasicServer {
 
     }
 
+
     protected final void registerGet(String route, RouteHandler handler) {
-        getRoutes().put("GET " + route, handler);
+        registerGenericHandler("GET", route, handler);
     }
-    protected void registerPost(String route,RouteHandler handler){
-        getRoutes().put("POST " + route,handler);
+
+    protected final void registerPost(String route, RouteHandler handler) {
+        registerGenericHandler("POST", route, handler);
     }
 
     protected final void registerFileHandler(String fileExt, ContentType type) {
