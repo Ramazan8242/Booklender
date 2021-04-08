@@ -75,10 +75,10 @@ public class Lesson45Server extends BasicServer {
         renderTemplate(exchange,"sample.html", getSampleDataModel());
     }
     private void freemarkerBookHandler(HttpExchange exchange) {
-        renderTemplate(exchange,"books.ftl", getBookDataModel());
+        renderTemplate(exchange,"books.html", getBookDataModel());
     }
     private void freemarkerUserHandler(HttpExchange httpExchange) {
-        renderTemplate(httpExchange,"user.html", getUserDataModel());
+        renderTemplate(httpExchange,"user.ftl", getUserDataModel());
     }
     private void freemarkerHomePageHandler(HttpExchange httpExchange) {
         renderTemplate(httpExchange,"home.ftl", getHomePageDataModel());
@@ -88,17 +88,10 @@ public class Lesson45Server extends BasicServer {
         sendFile(httpExchange,path,ContentType.TEXT_HTML);
     }
     private void registerPostRequest(HttpExchange exchange) {
-//        String cType = getContentType(exchange);
+        String cType = getContentType(exchange);
         String raw = getBody(exchange);
         Map<String, String> parsed =
                 Utils.parseUrlEncoded(raw, "&");
-//        if (isExistUser(parsed.get(EMAIL))){
-//            renderTemplate(exchange,"error.html",parsed);
-//            return;
-//        }
-//        User user = registrationUser(parsed);
-//        renderTemplate(exchange,"profile.html",user);
-
         if (isValidUser(parsed)) {
             redirect303(exchange,"/profile");
             return;
@@ -107,11 +100,14 @@ public class Lesson45Server extends BasicServer {
     }
 
     private User registrationUser(Map<String, String> parsed) {
-        User newUser  = new User();
-        newUser.setEmail(parsed.get(EMAIL));
-        newUser.setLogin(parsed.get(LOGIN));
-        newUser.setPassword(parsed.get(PASSWORD));
-        users.add(newUser);
+//        User newUser = new User();
+//        newUser.setEmail(parsed.get(EMAIL));
+//        newUser.setLogin(parsed.get(LOGIN));
+//        newUser.setPassword(parsed.get(PASSWORD));
+//        users.add(newUser);
+//        return newUser;
+            User newUser = User.makeUser(parsed.get(EMAIL), parsed.get(LOGIN), parsed.get(PASSWORD));
+            users.add(newUser);
         return newUser;
     }
 
@@ -123,16 +119,18 @@ public class Lesson45Server extends BasicServer {
         Path path = makeFilePath("login.html");
         sendFile(exchange,path,ContentType.TEXT_HTML);
     }
-    private void  loginPost(HttpExchange httpExchange) {
-        String cType = getContentType(httpExchange);
-        String raw = getBody(httpExchange);
-        Map<String, String> parsed = Utils.parseUrlEncoded(raw, "&");
-        if (isExistUser(parsed.get(EMAIL))){
-            renderTemplate(httpExchange,"error.html",parsed);
+    private void  loginPost(HttpExchange exchange) {
+        String cType = getContentType(exchange);
+        String raw = getBody(exchange);
+
+        Map<String, String> parsed =
+                Utils.parseUrlEncoded(raw, "&");
+        if(isExistUser(parsed.get(EMAIL))){
+            renderTemplate(exchange, "error.html", parsed);
             return;
         }
         User user = registrationUser(parsed);
-        renderTemplate(httpExchange,"profile.html",user);
+        renderTemplate(exchange, "profile.html", user);
     }
 
     private boolean isValidUser(Map<String, String> parsed) {
