@@ -13,7 +13,6 @@ import java.util.Map;
 public abstract class BasicServer {
 
     private final HttpServer server;
-    // путь к каталогу с файлами, которые будет отдавать сервер по запросам клиентов
     private final String dataDir = "data";
     private Map<String, RouteHandler> routes = new HashMap<>();
 
@@ -79,10 +78,10 @@ public abstract class BasicServer {
         registerFileHandler(".html", ContentType.TEXT_HTML);
         registerFileHandler(".ftl", ContentType.TEXT_HTML);
         registerFileHandler(".jpg", ContentType.IMAGE_JPEG);
+        registerFileHandler(".jpeg", ContentType.IMAGE_JPEG);
         registerFileHandler(".png", ContentType.IMAGE_PNG);
 
     }
-
 
     protected final void registerGet(String route, RouteHandler handler) {
         registerGenericHandler("GET", route, handler);

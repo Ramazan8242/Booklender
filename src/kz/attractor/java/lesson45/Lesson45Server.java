@@ -1,5 +1,8 @@
 package kz.attractor.java.lesson45;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.HttpExchange;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -24,27 +27,50 @@ public class Lesson45Server extends BasicServer {
     private final static Configuration freemarker = initFreeMarker();
     public static final String LOGIN = "login";
     public static final String PASSWORD = "password";
+    public static final String DATA_CANDIDATES_JSON = "data/candidates.json";
     private List<User> users = new ArrayList<>();
+    private List<Member> members = new ArrayList<>();
 
     public Lesson45Server(String host, int port) throws IOException {
         super(host, port);
-        registerGet("/sample", this::freemarkerSampleHandler);
+//        registerGet("/sample", this::freemarkerSampleHandler);
+//
+//        registerGet("/books", this::freemarkerBookHandler);
+//        registerGet("/user", this::freemarkerUserHandler);
+//        registerGet("/success", this::freemarkerHomePageHandler);
+//
+//        registerGet("/login", this::loginGet);
+//        registerPost("/login", this::loginPost);
+//
+//        registerGet("/register", this::registerGetRequest);
+//        registerPost("/register", this::registerPostRequest);
+//
+//        registerGet("/profile", this::profileGet);
+//
+//        registerGet("/session", this::sessionHandler);
+//
+//        registerGet("/query", this::handleQueryRequest);
 
-        registerGet("/books", this::freemarkerBookHandler);
-        registerGet("/user", this::freemarkerUserHandler);
-        registerGet("/success", this::freemarkerHomePageHandler);
+        registerGet("/", this::showMain);
+        registerGet("/votes", this::showVotes);
+        registerGet("/thankYou", this::showThankYou);
 
-        registerGet("/login", this::loginGet);
-        registerPost("/login", this::loginPost);
+        initMember();
+    }
 
-        registerGet("/register", this::registerGetRequest);
-        registerPost("/register", this::registerPostRequest);
+    private void showThankYou(HttpExchange httpExchange) {
+        DataModel dataModel = new DataModel(members);
+        renderTemplate(httpExchange,"thankYou.ftl",dataModel);
+    }
 
-        registerGet("/profile", this::profileGet);
+    private void showMain(HttpExchange httpExchange) {
+        DataModel dataModel = new DataModel(members);
+        renderTemplate(httpExchange,"candidates.ftl",dataModel);
+    }
 
-        registerGet("/session", this::sessionHandler);
-
-        registerGet("/query", this::handleQueryRequest);
+    private void showVotes(HttpExchange httpExchange) {
+        DataModel dataModel = new DataModel(members);
+        renderTemplate(httpExchange,"votes.ftl",dataModel);
     }
 
     private void sessionHandler(HttpExchange exchange) {
@@ -279,5 +305,16 @@ public class Lesson45Server extends BasicServer {
         Map<String, Object> data = new HashMap<>();
         data.put("params", params);
         renderTemplate(exchange, "query.ftl", data);
+    }
+    private void initMember() throws FileNotFoundException {
+        Gson gson = new Gson();
+        JsonReader reader = new JsonReader(
+                new FileReader(DATA_CANDIDATES_JSON));
+        members = Arrays.asList(gson.fromJson(reader,Member[].class));
+        Integer id = 0;
+        for (Member member : members) {
+            member.setId(id++);
+            id += 1;
+        }
     }
 }
